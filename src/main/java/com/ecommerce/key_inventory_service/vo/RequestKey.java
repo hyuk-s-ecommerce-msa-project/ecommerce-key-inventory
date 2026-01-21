@@ -8,5 +8,4 @@ import java.util.List;
 public class RequestKey {
     private List<String> productId;
     private String orderId;
-    private String userId;
 }

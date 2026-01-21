@@ -24,20 +24,24 @@ public class KeyInventoryServiceImpl implements KeyInventoryService {
 
     @Override
     @Transactional
-    public void revokeKeys(String orderId) {
+    public void revokeKeys(String orderId, String userId) {
         List<KeyInventoryEntity> keys = keyInventoryRepository.findAllByOrderId(orderId);
+
+        if (!keys.isEmpty() && !keys.get(0).getUserId().equals(userId)) {
+            throw new RuntimeException("Access denied for this order");
+        }
 
         List<KeyInventoryEntity> targets = keys.stream().filter(key -> key.getStatus() == KeyStatus.RESERVED).toList();
 
         if (targets.isEmpty()) {
-            return;
+            throw new RuntimeException("No such key");
         }
 
         List<KeyHistoryEntity> histories = targets.stream()
                 .map(key -> KeyHistoryEntity.create(
                         key.getId(),
                         orderId,
-                        key.getUserId(),
+                        userId,
                         KeyStatus.AVAILABLE
                 )).toList();
 
@@ -64,11 +68,15 @@ public class KeyInventoryServiceImpl implements KeyInventoryService {
 
     @Override
     @Transactional
-    public List<KeyInventoryDto> confirmKeys(String orderId) {
+    public List<KeyInventoryDto> confirmKeys(String orderId, String userId) {
         List<KeyInventoryEntity> keys = keyInventoryRepository.findAllByOrderId(orderId);
 
         if (keys.isEmpty()) {
             throw new RuntimeException("no assigned key for order id : " + orderId);
+        }
+
+        if (!keys.get(0).getUserId().equals(userId)) {
+            throw new RuntimeException("Access denied for this order");
         }
 
         keys.stream().filter(key -> key.getStatus() == KeyStatus.RESERVED)
@@ -78,7 +86,7 @@ public class KeyInventoryServiceImpl implements KeyInventoryService {
                 .map(key -> KeyHistoryEntity.create(
                         key.getId(),
                         key.getOrderId(),
-                        key.getUserId(),
+                        userId,
                         KeyStatus.SOLD
                 )).toList();
 

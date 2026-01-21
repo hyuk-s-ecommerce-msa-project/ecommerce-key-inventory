@@ -22,8 +22,8 @@ public class KeyInventoryController {
     private final ModelMapper modelMapper;
 
     @PostMapping("/assign")
-    public ResponseEntity<List<ResponseKey>> assignKey(@RequestBody RequestKey requestKey) {
-        List<KeyInventoryDto> keyInventoryDto = keyInventoryService.assignKey(requestKey.getProductId(), requestKey.getOrderId(), requestKey.getUserId());
+    public ResponseEntity<List<ResponseKey>> assignKey(@RequestBody RequestKey requestKey, @RequestHeader("userId") String userId) {
+        List<KeyInventoryDto> keyInventoryDto = keyInventoryService.assignKey(requestKey.getProductId(), requestKey.getOrderId(), userId);
 
         List<ResponseKey> responseKey = keyInventoryDto.stream().map(
                 dto -> modelMapper.map(dto, ResponseKey.class)).toList();
@@ -32,8 +32,8 @@ public class KeyInventoryController {
     }
 
     @PostMapping("/confirm")
-    public ResponseEntity<List<ResponseKey>> confirmKey(@RequestBody RequestKey requestKey) {
-        List<KeyInventoryDto> keyInventoryDto = keyInventoryService.confirmKeys(requestKey.getOrderId());
+    public ResponseEntity<List<ResponseKey>> confirmKey(@RequestBody RequestKey requestKey, @RequestHeader("userId") String userId) {
+        List<KeyInventoryDto> keyInventoryDto = keyInventoryService.confirmKeys(requestKey.getOrderId(), userId);
 
         List<ResponseKey> responseKeys = keyInventoryDto.stream().map(
                 dto -> modelMapper.map(dto, ResponseKey.class)).toList();
@@ -41,8 +41,8 @@ public class KeyInventoryController {
         return ResponseEntity.status(HttpStatus.OK).body(responseKeys);
     }
 
-    @GetMapping("/order/{userId}")
-    public ResponseEntity<List<ResponseUser>> getAllKeysByUser(@PathVariable String userId) {
+    @GetMapping("/order/key/list")
+    public ResponseEntity<List<ResponseUser>> getAllKeysByUser(@RequestHeader("userId") String userId) {
         List<UserKeyDto> userKeyDto = keyInventoryService.getAllKeys(userId);
 
         List<ResponseUser> response =  userKeyDto.stream().map(key -> modelMapper.map(key, ResponseUser.class)).toList();
@@ -51,8 +51,8 @@ public class KeyInventoryController {
     }
 
     @PostMapping("/revoke")
-    public ResponseEntity<Void> revokeKey(@RequestBody RequestKey requestKey) {
-        keyInventoryService.revokeKeys(requestKey.getOrderId());
+    public ResponseEntity<Void> revokeKey(@RequestBody RequestKey requestKey, @RequestHeader("userId") String userId) {
+        keyInventoryService.revokeKeys(requestKey.getOrderId(), userId);
 
         return ResponseEntity.ok().build();
     }

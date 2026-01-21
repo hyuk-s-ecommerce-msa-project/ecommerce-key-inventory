@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface KeyInventoryService {
     List<KeyInventoryDto> assignKey(List<String> productId, String orderId, String userId);
-    List<KeyInventoryDto> confirmKeys(String orderId);
+    List<KeyInventoryDto> confirmKeys(String orderId, String userId);
     List<UserKeyDto> getAllKeys(String userId);
-    void revokeKeys(String orderId);
+    void revokeKeys(String orderId, String userId);
 }
