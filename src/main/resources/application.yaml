@@ -36,3 +36,12 @@ eureka:
       defaultZone: http://127.0.0.1:8761/eureka
     fetch-registry: true
     register-with-eureka: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - beans
+          - info
