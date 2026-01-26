@@ -4,6 +4,9 @@ server:
 spring:
   application:
     name: key-inventory-service
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
   cloud:
     config:
       name: gameinfo
@@ -45,3 +48,4 @@ management:
           - health
           - beans
           - info
+          - busrefresh
