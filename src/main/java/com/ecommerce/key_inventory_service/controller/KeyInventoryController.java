@@ -28,7 +28,7 @@ public class KeyInventoryController {
         List<ResponseKey> responseKey = keyInventoryDto.stream().map(
                 dto -> modelMapper.map(dto, ResponseKey.class)).toList();
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseKey);
     }
 
     @PostMapping("/confirm")
