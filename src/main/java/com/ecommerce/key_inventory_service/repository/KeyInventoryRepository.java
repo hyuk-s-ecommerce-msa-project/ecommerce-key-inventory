@@ -18,4 +18,7 @@ public interface KeyInventoryRepository extends CrudRepository<KeyInventoryEntit
     List<KeyInventoryEntity> findAllByOrderId(String orderId);
 
     List<KeyInventoryEntity> findAllByStatusAndSoldAtBefore(KeyStatus status, LocalDateTime soldAt);
+
+    @Override
+    List<KeyInventoryEntity> findAll();
 }

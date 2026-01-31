@@ -7,12 +7,16 @@ import com.ecommerce.key_inventory_service.entity.KeyInventoryEntity;
 import com.ecommerce.key_inventory_service.entity.enums.KeyStatus;
 import com.ecommerce.key_inventory_service.repository.KeyHistoryRepository;
 import com.ecommerce.key_inventory_service.repository.KeyInventoryRepository;
+import com.ecommerce.key_inventory_service.vo.RequestKey;
+import com.ecommerce.key_inventory_service.vo.ResponseAllKeys;
+import com.ecommerce.key_inventory_service.vo.ResponseKey;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -21,6 +25,17 @@ public class KeyInventoryServiceImpl implements KeyInventoryService {
     private final KeyInventoryRepository keyInventoryRepository;
     private final ModelMapper modelMapper;
     private final KeyHistoryRepository keyHistoryRepository;
+
+    @Override
+    public List<ResponseAllKeys> getAllKeys() {
+        List<KeyInventoryEntity> allKeys = keyInventoryRepository.findAll();
+
+        if (allKeys.isEmpty()) {
+            throw new RuntimeException("there is no such key in inventory");
+        }
+
+        return allKeys.stream().map(keys -> modelMapper.map(keys, ResponseAllKeys.class)).toList();
+    }
 
     @Override
     @Transactional
@@ -96,7 +111,7 @@ public class KeyInventoryServiceImpl implements KeyInventoryService {
     }
 
     @Override
-    public List<UserKeyDto> getAllKeys(String userId) {
+    public List<UserKeyDto> getAllKeysByUserId(String userId) {
         List<KeyInventoryEntity> entities = keyInventoryRepository.findByUserIdOrderBySoldAtDesc(userId, PageRequest.of(0, 10));
 
         return entities.stream().map(info -> {

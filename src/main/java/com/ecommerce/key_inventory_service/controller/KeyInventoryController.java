@@ -4,6 +4,7 @@ import com.ecommerce.key_inventory_service.dto.KeyInventoryDto;
 import com.ecommerce.key_inventory_service.dto.UserKeyDto;
 import com.ecommerce.key_inventory_service.service.KeyInventoryService;
 import com.ecommerce.key_inventory_service.vo.RequestKey;
+import com.ecommerce.key_inventory_service.vo.ResponseAllKeys;
 import com.ecommerce.key_inventory_service.vo.ResponseKey;
 import com.ecommerce.key_inventory_service.vo.ResponseUser;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,13 @@ import java.util.List;
 public class KeyInventoryController {
     private final KeyInventoryService keyInventoryService;
     private final ModelMapper modelMapper;
+
+    @GetMapping("/keys")
+    public ResponseEntity<List<ResponseAllKeys>> getAllKeys() {
+        List<ResponseAllKeys> response = keyInventoryService.getAllKeys();
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 
     @PostMapping("/assign")
     public ResponseEntity<List<ResponseKey>> assignKey(@RequestBody RequestKey requestKey, @RequestHeader("userId") String userId) {
@@ -43,7 +51,7 @@ public class KeyInventoryController {
 
     @GetMapping("/order/key/list")
     public ResponseEntity<List<ResponseUser>> getAllKeysByUser(@RequestHeader("userId") String userId) {
-        List<UserKeyDto> userKeyDto = keyInventoryService.getAllKeys(userId);
+        List<UserKeyDto> userKeyDto = keyInventoryService.getAllKeysByUserId(userId);
 
         List<ResponseUser> response =  userKeyDto.stream().map(key -> modelMapper.map(key, ResponseUser.class)).toList();
 
