@@ -59,9 +59,11 @@ public class KeyInventoryController {
     }
 
     @PostMapping("/revoke")
-    public ResponseEntity<Void> revokeKey(@RequestBody RequestKey requestKey, @RequestHeader("userId") String userId) {
-        keyInventoryService.revokeKeys(requestKey.getOrderId(), userId);
+    public ResponseEntity<List<ResponseKey>> revokeKey(@RequestBody RequestKey requestKey, @RequestHeader("userId") String userId) {
+        List<KeyInventoryDto> revokedKeys = keyInventoryService.revokeKeys(requestKey.getOrderId(), userId);
 
-        return ResponseEntity.ok().build();
+        List<ResponseKey> response = revokedKeys.stream().map(key -> modelMapper.map(key, ResponseKey.class)).toList();
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

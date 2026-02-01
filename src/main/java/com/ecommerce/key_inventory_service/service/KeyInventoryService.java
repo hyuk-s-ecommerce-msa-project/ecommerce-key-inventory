@@ -12,6 +12,6 @@ public interface KeyInventoryService {
     List<KeyInventoryDto> assignKey(List<String> productId, String orderId, String userId);
     List<KeyInventoryDto> confirmKeys(String orderId, String userId);
     List<UserKeyDto> getAllKeysByUserId(String userId);
-    void revokeKeys(String orderId, String userId);
+    List<KeyInventoryDto> revokeKeys(String orderId, String userId);
     List<ResponseAllKeys> getAllKeys();
 }

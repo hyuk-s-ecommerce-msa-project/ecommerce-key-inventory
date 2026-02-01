@@ -39,7 +39,7 @@ public class KeyInventoryServiceImpl implements KeyInventoryService {
 
     @Override
     @Transactional
-    public void revokeKeys(String orderId, String userId) {
+    public List<KeyInventoryDto> revokeKeys(String orderId, String userId) {
         List<KeyInventoryEntity> keys = keyInventoryRepository.findAllByOrderId(orderId);
 
         if (!keys.isEmpty() && !keys.get(0).getUserId().equals(userId)) {
@@ -63,6 +63,8 @@ public class KeyInventoryServiceImpl implements KeyInventoryService {
         targets.forEach(KeyInventoryEntity::revoke);
 
         keyHistoryRepository.saveAll(histories);
+
+        return targets.stream().map(key -> modelMapper.map(key, KeyInventoryDto.class)).toList();
     }
 
     @Override
