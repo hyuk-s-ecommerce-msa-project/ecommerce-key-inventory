@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 public class KeyHistoryEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Long keyId;
@@ -28,9 +27,10 @@ public class KeyHistoryEntity {
     @CreatedDate
     private LocalDateTime createdDate;
 
-    public static KeyHistoryEntity create(Long keyId, String orderId, String userId, KeyStatus status) {
+    public static KeyHistoryEntity create(Long id, Long keyId, String orderId, String userId, KeyStatus status) {
         KeyHistoryEntity keyHistoryEntity = new KeyHistoryEntity();
 
+        keyHistoryEntity.id = id;
         keyHistoryEntity.keyId = keyId;
         keyHistoryEntity.orderId = orderId;
         keyHistoryEntity.userId = userId;

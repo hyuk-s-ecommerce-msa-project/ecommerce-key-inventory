@@ -7,17 +7,18 @@ import com.ecommerce.key_inventory_service.entity.KeyInventoryEntity;
 import com.ecommerce.key_inventory_service.entity.enums.KeyStatus;
 import com.ecommerce.key_inventory_service.repository.KeyHistoryRepository;
 import com.ecommerce.key_inventory_service.repository.KeyInventoryRepository;
-import com.ecommerce.key_inventory_service.vo.RequestKey;
 import com.ecommerce.key_inventory_service.vo.ResponseAllKeys;
-import com.ecommerce.key_inventory_service.vo.ResponseKey;
+import com.ecommerce.snowflake.util.SnowflakeIdGenerator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-
+import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +26,44 @@ public class KeyInventoryServiceImpl implements KeyInventoryService {
     private final KeyInventoryRepository keyInventoryRepository;
     private final ModelMapper modelMapper;
     private final KeyHistoryRepository keyHistoryRepository;
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    @Override
+    @Transactional
+    public void uploadFromUrl() {
+        String csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQUQSzdkH-VTj1wDMGPhDehMdg4aY7LxTL7n3sXBn2UFd9rKQ2RE_jU_P2s8Dgzt_abij2iWztN7mlI/pub?gid=0&single=true&output=csv";
+
+        String csvData = restTemplate.getForObject(csvUrl, String.class);
+        if (csvData == null || csvData.isEmpty()) return;
+
+        String[] lines = csvData.split("\n");
+
+        Set<String> existingKeys = keyInventoryRepository.findAll()
+                .stream()
+                .map(KeyInventoryEntity::getGameKey)
+                .collect(Collectors.toSet());
+
+        List<KeyInventoryEntity> newEntities = new ArrayList<>();
+
+        for (String line : lines) {
+            String[] columns = line.split(",");
+            if (columns.length < 2) continue;
+
+            String productId = columns[0].trim();
+            String gameKey = columns[1].trim();
+
+            if (existingKeys.contains(gameKey)) continue;
+
+            Long snowflakeId = snowflakeIdGenerator.nextId();
+            newEntities.add(KeyInventoryEntity.createKey(snowflakeId, productId, gameKey));
+        }
+
+        if (!newEntities.isEmpty()) {
+            keyInventoryRepository.saveAll(newEntities);
+        }
+    }
+
 
     @Override
     public List<ResponseAllKeys> getAllKeys() {
@@ -52,8 +91,11 @@ public class KeyInventoryServiceImpl implements KeyInventoryService {
             throw new RuntimeException("No such key");
         }
 
+        Long snowflakeId = snowflakeIdGenerator.nextId();
+
         List<KeyHistoryEntity> histories = targets.stream()
                 .map(key -> KeyHistoryEntity.create(
+                        snowflakeId,
                         key.getId(),
                         orderId,
                         userId,
@@ -99,8 +141,11 @@ public class KeyInventoryServiceImpl implements KeyInventoryService {
         keys.stream().filter(key -> key.getStatus() == KeyStatus.RESERVED)
                 .forEach(KeyInventoryEntity::confirmSold);
 
+        Long snowflakeId = snowflakeIdGenerator.nextId();
+
         List<KeyHistoryEntity> histories = keys.stream()
                 .map(key -> KeyHistoryEntity.create(
+                        snowflakeId,
                         key.getId(),
                         key.getOrderId(),
                         userId,

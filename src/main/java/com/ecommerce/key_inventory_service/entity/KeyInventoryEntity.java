@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 public class KeyInventoryEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
@@ -35,6 +34,18 @@ public class KeyInventoryEntity {
     private LocalDateTime keyUploadedDate;
     @Column(nullable = true)
     private LocalDateTime soldAt;
+
+    public static KeyInventoryEntity createKey(Long id, String productId, String gameKey) {
+        KeyInventoryEntity entity = new KeyInventoryEntity();
+
+        entity.id = id;
+        entity.productId = productId;
+        entity.gameKey = gameKey;
+        entity.status = KeyStatus.AVAILABLE;
+        entity.keyUploadedDate = LocalDateTime.now();
+
+        return entity;
+    }
 
     public void assignToOrder(String orderId, String userId) {
         this.status = KeyStatus.RESERVED;

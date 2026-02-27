@@ -3,9 +3,11 @@ package com.ecommerce.key_inventory_service.service;
 import com.ecommerce.key_inventory_service.dto.KeyInventoryDto;
 import com.ecommerce.key_inventory_service.dto.UserKeyDto;
 import com.ecommerce.key_inventory_service.vo.RequestKey;
+import com.ecommerce.key_inventory_service.vo.RequestUploadKeys;
 import com.ecommerce.key_inventory_service.vo.ResponseAllKeys;
 import com.ecommerce.key_inventory_service.vo.ResponseKey;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface KeyInventoryService {
@@ -14,4 +16,5 @@ public interface KeyInventoryService {
     List<UserKeyDto> getAllKeysByUserId(String userId);
     List<KeyInventoryDto> revokeKeys(String orderId, String userId);
     List<ResponseAllKeys> getAllKeys();
+    void uploadFromUrl();
 }

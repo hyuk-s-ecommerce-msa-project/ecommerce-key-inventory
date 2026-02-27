@@ -3,10 +3,7 @@ package com.ecommerce.key_inventory_service.controller;
 import com.ecommerce.key_inventory_service.dto.KeyInventoryDto;
 import com.ecommerce.key_inventory_service.dto.UserKeyDto;
 import com.ecommerce.key_inventory_service.service.KeyInventoryService;
-import com.ecommerce.key_inventory_service.vo.RequestKey;
-import com.ecommerce.key_inventory_service.vo.ResponseAllKeys;
-import com.ecommerce.key_inventory_service.vo.ResponseKey;
-import com.ecommerce.key_inventory_service.vo.ResponseUser;
+import com.ecommerce.key_inventory_service.vo.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -21,6 +18,18 @@ import java.util.List;
 public class KeyInventoryController {
     private final KeyInventoryService keyInventoryService;
     private final ModelMapper modelMapper;
+
+    @GetMapping("/upload")
+    public ResponseEntity<String> uploadKeysFromSheet() {
+        try {
+            keyInventoryService.uploadFromUrl();
+
+            return ResponseEntity.ok("Google Sheet data has been synchronized successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body("Failed to upload keys: " + e.getMessage());
+        }
+    }
 
     @GetMapping("/keys")
     public ResponseEntity<List<ResponseAllKeys>> getAllKeys() {

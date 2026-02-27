@@ -5,6 +5,7 @@ import com.ecommerce.key_inventory_service.entity.KeyInventoryEntity;
 import com.ecommerce.key_inventory_service.entity.enums.KeyStatus;
 import com.ecommerce.key_inventory_service.repository.KeyHistoryRepository;
 import com.ecommerce.key_inventory_service.repository.KeyInventoryRepository;
+import com.ecommerce.snowflake.util.SnowflakeIdGenerator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import java.util.List;
 public class KeyCleanUpScheduler {
     private final KeyInventoryRepository keyInventoryRepository;
     private final KeyHistoryRepository keyHistoryRepository;
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
 
     @Scheduled(fixedDelay = 300000)
     @Transactional
@@ -36,8 +38,11 @@ public class KeyCleanUpScheduler {
 
         log.info("Number of automatically revoked keys : {}", expiredKeys.size());
 
+        Long snowflakeId = snowflakeIdGenerator.nextId();
+
         List<KeyHistoryEntity> histories = expiredKeys.stream()
                 .map(key -> KeyHistoryEntity.create(
+                        snowflakeId,
                         key.getId(),
                         key.getOrderId(),
                         key.getUserId(),
