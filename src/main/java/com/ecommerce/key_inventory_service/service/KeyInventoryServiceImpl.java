@@ -112,17 +112,21 @@ public class KeyInventoryServiceImpl implements KeyInventoryService {
     @Override
     @Transactional
     public List<KeyInventoryDto> assignKey(List<String> productIds, String orderId, String userId) {
-        return productIds.stream().map(productId -> {
-            KeyInventoryEntity key = keyInventoryRepository.findFirstByProductIdAndStatus(productId, KeyStatus.AVAILABLE);
+        int requiredCount = productIds.size();
+        String productId = productIds.get(0);
 
-            if (key == null) {
-                throw new RuntimeException("no stock for product id : " + productId);
-            }
+        // 위에서 만든 SKIP LOCKED 쿼리 호출
+        List<KeyInventoryEntity> keys = keyInventoryRepository.findAvailableKeys(productId, requiredCount);
 
-            key.assignToOrder(orderId, userId);
+        if (keys.size() < requiredCount) {
+            throw new RuntimeException("재고 부족: " + productId);
+        }
 
-            return modelMapper.map(key, KeyInventoryDto.class);
-        }).toList();
+        keys.forEach(key -> key.assignToOrder(orderId, userId));
+
+        return keys.stream()
+                .map(key -> modelMapper.map(key, KeyInventoryDto.class))
+                .toList();
     }
 
     @Override
