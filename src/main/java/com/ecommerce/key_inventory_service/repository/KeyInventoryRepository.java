@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,8 +24,8 @@ public interface KeyInventoryRepository extends CrudRepository<KeyInventoryEntit
 
     @Query(value = "SELECT * FROM key_inventory k " +
             "WHERE k.product_id = :productId AND k.status = 'AVAILABLE' " +
-            "LIMIT :count FOR UPDATE WAIT 1", nativeQuery = true)
-    List<KeyInventoryEntity> findAvailableKeys(String productId, int count);
+            "LIMIT :count FOR UPDATE SKIP LOCKED", nativeQuery = true)
+    List<KeyInventoryEntity> findAvailableKeys(@Param("productId") String productId, @Param("count") int count);
 
     @Override
     List<KeyInventoryEntity> findAll();
