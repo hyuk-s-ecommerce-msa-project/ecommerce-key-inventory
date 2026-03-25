@@ -1,5 +1,5 @@
 server:
-  port: 0
+  port: 8085
 
 spring:
   threads:
@@ -11,18 +11,18 @@ spring:
       max-lifetime: 180000
       connection-timeout: 5000
       maximum-pool-size: 50
-    url: jdbc:mariadb://localhost:3306/gameinfo_key_inventory
+    url: jdbc:mariadb://10.0.0.4:3306/gameinfo_key_inventory
   application:
     name: key-inventory-service
   rabbitmq:
-    host: 127.0.0.1
+    host: 10.0.0.4
     port: 5672
   cloud:
     config:
       name: gameinfo
   config:
     import:
-      - "optional:configserver:http://localhost:9088"
+      - "optional:configserver:http://config-service:9088"
   h2:
     console:
       enabled: true
@@ -39,15 +39,6 @@ spring:
         format_sql: false
         dialect: org.hibernate.dialect.MariaDBDialect
 
-eureka:
-  instance:
-    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
-  client:
-    service-url:
-      defaultZone: http://127.0.0.1:8761/eureka
-    fetch-registry: true
-    register-with-eureka: true
-
 management:
   tracing:
     sampling:
@@ -55,7 +46,7 @@ management:
     enabled: true
   zipkin:
     tracing:
-      endpoint: http://localhost:9411/api/v2/spans
+      endpoint: http://10.0.0.4:9411/api/v2/spans
   endpoints:
     web:
       exposure:
